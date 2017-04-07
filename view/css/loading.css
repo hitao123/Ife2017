@@ -52,7 +52,7 @@
 	border-right-color: #f00;
 	border-top-color: #f00;
 	transform: rotate(45deg);
-	animation: rotate_next 4s linear 1s infinite;
+	/*animation: rotate_next 4s linear 1s infinite;*/
 }
 .rotate-full {
 	z-index: 1;
@@ -61,9 +61,6 @@
 	border-right-color: #f00;
 	border-top-color: #f00;
 	border-left-color: pink;
-	-webkit-animation-delay: 0.5s;
-	-o-animation-delay: 0.5s;
-	animation-delay: 0.5s;
 }
 
 @keyframes rotate_pre {
