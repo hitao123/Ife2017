@@ -81,58 +81,58 @@ function rgbToHSL(rgb) {
 	}
 	return [Math.round(h), Math.round(s * 100) / 100, Math.round(l * 100) / 100];
 }
-/**
- *  HSL 转换为 rgb
- */
-function hslToRGB(hsl) {
-	let h = hsl[0] - 0,
-	    s = hsl[1] - 0,
-	    l = hsl[2] - 0;
-	let r, g, b;
-	if (s == 0) {
-	    r = g = b = l;
-	}
-	else {
-	    let p, q, k;
-	    if (l < 0.5) {
-	        q = l * (1 + s);
-	    }
-	    else if (l >= 0.5) {
-	        q = l + s - (l * s);
-	    }
-	    p = 2 * l - q;
-	    k = h / 360;
+// /**
+//  *  HSL 转换为 rgb
+//  */
+// function hslToRGB(hsl) {
+// 	let h = hsl[0] - 0,
+// 	    s = hsl[1] - 0,
+// 	    l = hsl[2] - 0;
+// 	let r, g, b;
+// 	if (s == 0) {
+// 	    r = g = b = l;
+// 	}
+// 	else {
+// 	    let p, q, k;
+// 	    if (l < 0.5) {
+// 	        q = l * (1 + s);
+// 	    }
+// 	    else if (l >= 0.5) {
+// 	        q = l + s - (l * s);
+// 	    }
+// 	    p = 2 * l - q;
+// 	    k = h / 360;
 
-	    r = singleColorCalculation(k + 1 / 3, p, q);
-	    g = singleColorCalculation(k, p, q);
-	    b = singleColorCalculation(k - 1 / 3, p, q);
+// 	    r = singleColorCalculation(k + 1 / 3, p, q);
+// 	    g = singleColorCalculation(k, p, q);
+// 	    b = singleColorCalculation(k - 1 / 3, p, q);
 
-	}
-	return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+// 	}
+// 	return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 
-	function singleColorCalculation(k) {
-	    let color;
-	    if (k < 0) {
-	        k += 1;
-	    }
-	    if (k > 1) {
-	        k -= 1;
-	    }
-	    if (k * 6 < 1) {
-	        color = p + ((q - p) * 6 * k);
-	    }
-	    else if (k * 6 >= 1 && k < 0.5) {
-	        color = q;
-	    }
-	    else if (k >= 0.5 && 3 * k < 2) {
-	        color = p + ((q - p) * 6 * (2 / 3 - k));
-	    }
-	    else {
-	        color = p;
-	    }
-	    return color;
-	}
-}
+// 	function singleColorCalculation(k) {
+// 	    let color;
+// 	    if (k < 0) {
+// 	        k += 1;
+// 	    }
+// 	    if (k > 1) {
+// 	        k -= 1;
+// 	    }
+// 	    if (k * 6 < 1) {
+// 	        color = p + ((q - p) * 6 * k);
+// 	    }
+// 	    else if (k * 6 >= 1 && k < 0.5) {
+// 	        color = q;
+// 	    }
+// 	    else if (k >= 0.5 && 3 * k < 2) {
+// 	        color = p + ((q - p) * 6 * (2 / 3 - k));
+// 	    }
+// 	    else {
+// 	        color = p;
+// 	    }
+// 	    return color;
+// 	}
+// }
 /**
  * move selector
  */
@@ -156,11 +156,19 @@ function Picker(options) {
 		x: 0,
 		y: 0
 	};
-	this.renderHSL(this.options.id[0],getRGB(this.options.rgb));
+	this.colorRGB = getRGB(this.options.rgb); //rgb(255,255,255)
+	this.colorHSL = rgbToHSL(this.options.rgb); //[255,0,0]
+	this.renderHSL(this.options.id[0],this.colorRGB);
 	this.renderRGB(this.options.id[1]);
 	//初始化输入框	
-	this.updateInputHSL(rgbToHSL(this.options.rgb));
+	this.updateInputHSL(this.colorHSL);
 	this.updateInputRGB(this.options.rgb); 
+	//更新位置
+	this.updateHSLPos();
+	this.updateRGBPos();
+	//监听输入
+	this.handleInput($$('.hsl'));
+	this.handleInput($$('.rgb'));
 	$('.back-color').style.backgroundColor = getRGB(this.options.rgb);
 }
 /**
@@ -191,6 +199,7 @@ Picker.prototype.renderHSL = function(id,rgb) {
 		_this.clickHSL(e,sel);
 		isDown = true;
 	});
+
 }
 /**
  * 渲染色相
@@ -249,7 +258,12 @@ Picker.prototype.clickHSL = function(event,selector) {
 	this.colorHSL = rgbToHSL(this.HSLdata.slice(0,3)); //返回一个数组
 	//更新输入框
 	this.updateInputHSL(this.colorHSL);
-	this.updateInputRGB(this.HSLdata.slice(0,3)); 
+	this.updateInputRGB(this.HSLdata.slice(0,3));
+	//更新rgb值
+	let color = rgbToCSS(this.HSLdata.slice(0,3));
+	$('.input-color').value = color;
+	//更新background
+	$('.back-color').style.backgroundColor = color; 
 }
 /**
  * 点击 RGB canvas
@@ -322,65 +336,86 @@ Picker.prototype.updateInputRGB = function(rgb) {
 /**
  * 处理输入
  */
-Picker.prototype.handleInput = function(event,selector) {
-	// const sele = selector;
-	// const len = sele.length;
-	// for(let i = 0; i < len; i++) {
-	// 	sele[i].addEventListener('change',function(e){
-	// 		//
-	// 	});
-	// }
+Picker.prototype.handleInput = function(selector) {
+	const sele = selector;
+	const len = sele.length;
+	for(let i = 0; i < len; i++) {
+		let that = this;
+		sele[i].addEventListener('change',function(e){
+			if(that.checkInput(e.target.value,sele[i])) {
+				that.options.rgb[i] = parseInt(e.target.value);
+				that.renderHSL(that.options.id[0],getRGB(that.options.rgb));
+				that.updateHSLPos();
+				that.updateRGBPos();
+				$('.back-color').style.backgroundColor = getRGB(that.options.rgb);
+			}
+		});
+	}
 }
 /**
  * 校验输入
  */
-Picker.prototype.checkInput = function(event,selector) {
-	const input = event.target;
-	const value = input.value;
+Picker.prototype.checkInput = function(val,selector) {
+	const value = val;
 	const sele = selector;
 	const len = sele.length;
 	// 校验
-	for(let i = 0 ; i < len; i++) {
-		if(sele[i].name === 'R' || sele[i].name === 'G' || sele[i].name === 'B') {
-			if(parseInt(value) >= 0 && parseInt(value) <= 255) {
-				return true;
-			} else {
-				return false;
-			}
-		} else if(sele[i].name === 'H') {
-			if(parseInt(value) >= 0 && parseInt(value) <= 360) {
-				return true;
-			} else {
-				return false; 
-			}
-		} else if(sele[i].name === 'S') {
-			if(parseInt(value) >= 0 && parseInt(value) <= 1) {
-				return true;
-			} else {
-				return false; 
-			}
-		} else if(sele[i].name === 'L'){
-			if(parseInt(value) >= 0 && parseInt(value) <= 1) {
-				return true;
-			} else {
-				return false; 
-			}
+	if(sele.name === 'R' || sele.name === 'G' || sele.name === 'B') {
+		if(parseInt(value) >= 0 && parseInt(value) <= 255) {
+			return true;
 		} else {
+			value = 0;
 			return false;
 		}
-	} 	
+	} else if(sele.name === 'H') {
+		if(parseInt(value) >= 0 && parseInt(value) <= 360) {
+			return true;
+		} else {
+			value = 0;
+			return false; 
+		}
+	} else if(sele.name === 'S') {
+		if(parseInt(value) >= 0 && parseInt(value) <= 1) {
+			return true;
+		} else {
+			value = 0;
+			return false; 
+		}
+	} else if(sele.name === 'L'){
+		if(parseInt(value) >= 0 && parseInt(value) <= 1) {
+			return true;
+		} else {
+			value = 0;
+			return false; 
+		}
+	} else {
+		value = 0;
+		return false;
+	}	
 }
 /**
  * 
  */
 Picker.prototype.updateHSLPos = function() {
-
+	//获取l值，根据该值计算 top 和 left
+	const l = this.colorHSL[2];
+	// 斜边长度
+	const length = 400 * Math.sqrt(2); //勾股定理 等腰直角
+	let left = parseInt(length * l / Math.sqrt(2));
+	let top = left;
+	this.HSLSelPos = {
+	    x: left,
+	    y: top
+	};
+	moveSelector($('.region-circle'), this.HSLSelPos);
 }
 /**
  * 
  */
 Picker.prototype.updateRGBPos = function() {
-
+	const h = this.colorHSL[0];
+	this.RGBSelPos.y = h / 360 * 400;
+	moveSelector($('.color-circle'), this.RGBSelPos);
 }
 /**
  * 
