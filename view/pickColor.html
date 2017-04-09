@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Pick Color</title>
+	<link rel="stylesheet" type="text/css" href="css/pickcolor.css">
+</head>
+<body>
+	<div class="container">
+		<div class="region-pick">
+			<canvas id="region-pick" width="400" height="400"></canvas>
+			<div class="region-circle">
+				<div class="inner-circle"></div>
+			</div>
+		</div>
+		<div class="color-pick">
+			<canvas id="color-pick" width="40" height="400"></canvas>
+			<div class="color-circle">
+				<div class="inner-circle"></div>
+			</div>
+		</div>
+		<div class="selector">
+			<div class="rgb-color">
+				<div>
+					<label>R</label>
+					<input name = "R" class="number rgb" type="number" placeholder="0-255">
+				</div>
+				<div>
+					<label>G</label>
+					<input name = "G" class="number rgb" type="number" placeholder="0-255">
+				</div>
+				<div>
+					<label>B</label>
+					<input name = "B" class="number rgb" type="number" placeholder="0-255">
+				</div>
+			</div>
+			<div class="hsl-color">
+				<div>
+					<label>H</label>
+					<input name = "H" class="number hsl" type="number" placeholder="0-360">
+				</div>
+				<div>
+					<label>S</label>
+					<input name = "S" class="number hsl" type="number" placeholder="0-100">
+				</div>
+				<div>
+					<label>L</label>
+					<input name = "L" class="number hsl" type="number" placeholder="0-100">
+				</div>
+			</div>
+			</hr>
+			<div class="color-show"></div>
+			<div class="change-color">
+				<button class="get-color">获取当前颜色值</button>
+				<input class="input-color" type="text" placeholder="设置格式如下">
+				<button class="set-color">设置颜色</button>
+				<div class="back-color"></div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript" src="js/pickcolor.js"></script>
+	<script type="text/javascript">
+		new Picker({
+			id: ["region-pick","color-pick"],
+			rgb: [192,168,155],
+			input : ['.rgb','.hsl']
+		})
+
+	</script>
+</body>
+</html>
