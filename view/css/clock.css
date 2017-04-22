@@ -1,0 +1,40 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+.container {
+	position: relative;
+	width: 600px;
+	height: 300px;
+	margin: 100px auto;
+}
+.clock {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin-top: -150px;
+	margin-left: -150px; 
+	z-index: 2;
+}
+.pointer {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin-top: -150px;
+	margin-left: -150px; 
+	z-index: 3;
+}
+.wrap {
+	width: 600px;
+	margin: 0 auto;
+	text-align: center;
+}
+[type="number"] {
+	width: 120px;
+	height: 20px;
+	border: none;
+	outline: 1px solid #333;
+	text-indent: 10px;
+}

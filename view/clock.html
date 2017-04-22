@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Clock</title>
+	<link rel="stylesheet" type="text/css" href="css/clock.css">
+</head>
+<body>
+	<div class="container">
+		<canvas id="clock" class="clock"></canvas>
+		<canvas id="pointer" class="pointer"></canvas>
+	</div>
+	<div class="wrap">
+		<input type="number" class="hour" placeholder="小时格式 0-23" min ="0" max="59"/>
+		<label>时</label>
+		<input type="number" class="minute" placeholder="分钟格式 0-59" min ="0" max="59"/>
+		<label>分</label>
+		<input type="number" class="seconds" placeholder="秒格式 0-59" min ="0" max="23"/>
+		<label>秒</label>
+		<button class="set">设置闹钟</button>
+	</div>
+	<script type="text/javascript" src="js/jquery-2.13.js"></script>
+	<script type="text/javascript" src="js/clock.js"></script>
+	<script type="text/javascript">
+		 new Clock();
+	</script>
+</body>
+</html>
