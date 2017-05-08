@@ -27,22 +27,14 @@ function player() {
  */
 player.prototype.init = function() {
 	var _this = this;
-	this.$prev.addEventListener('click', function() {
-		_this.prev();
-	});
-	this.$next.addEventListener('click', function() {
-		_this.next();
-	});
+	this.$prev.addEventListener('click', this.prev.bind(this));
+	this.$next.addEventListener('click', this.next.bind(this));
 	this.$play.addEventListener('click', this.play.bind(this));
 	this.$pause.addEventListener('click', this.pause.bind(this));
 	//播放时间改变触发
-	this.audio.addEventListener('timeupdate', function() {
-		_this.progress();
-	});
+	this.audio.addEventListener('timeupdate', this.progress.bind(this));
 	//播放结束之后触发
-	this.audio.addEventListener('ended', function() {
-		_this.next();
-	});
+	this.audio.addEventListener('ended',this.next.bind(this));
 	this.$proSlider.addEventListener('click', function(e) {
 		_this.setProgress(e);
 	});
@@ -53,17 +45,19 @@ player.prototype.init = function() {
  * 播放
  */
 player.prototype.play = function() {
+	//这里有一个注意的地方，SVG 图标 我们让 pause display,
+	//这样才可以切换状态
 	this.audio.play();
-	this.$play.style.display = 'inline-block';
-	this.$pause.style.display = 'none';	
+	this.$play.style.display = 'none';
+	this.$pause.style.display = 'inline-block';	
 }
 /**
  * 暂停
  */
-player.prototype.pause = function() {	
+player.prototype.pause = function() {
 	this.audio.pause();
-	this.$play.style.display = 'none';
-	this.$pause.style.display = 'inline-block';
+	this.$play.style.display = 'inline-block';
+	this.$pause.style.display = 'none';
 }
 /**
  * 加载歌曲名、歌手、进度条、专辑封面图片
