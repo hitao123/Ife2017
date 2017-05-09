@@ -7,14 +7,19 @@ function player() {
 	this.$title = $('.title');
 	this.$singer = $('.singer');
 	this.$time = $('.time');
+	this.$volume = $('.volume');
 	this.$volumeSlider = $('.volume-slider');
+	this.$volumeValue = $('.volume-slider-value');
+	this.$progress = $('.progress');
 	this.$proSlider = $('.progress-slider-value');
 	this.$coverLink = $('.play-cover');
 	this.$cover = $('.play-cover img');
-	this.$prev = $('.icon-prev');
-	this.$next = $('.icon-next');
-	this.$play = $('.icon-play');
-	this.$pause = $('.icon-pause');
+	this.$prev = $('.fa-step-backward');
+	this.$next = $('.fa-step-forward');
+	this.$play = $('.fa-play');
+	this.$pause = $('.fa-pause');
+	this.$pattern = $('.fa-random');
+	this.$patternDesc = $('.desc');
 
 	this.playList = playlist;
 	this.playListIndex = 0;
@@ -30,14 +35,14 @@ player.prototype.init = function() {
 	this.$prev.addEventListener('click', this.prev.bind(this));
 	this.$next.addEventListener('click', this.next.bind(this));
 	this.$play.addEventListener('click', this.play.bind(this));
+	this.$pattern.addEventListener('click', this.pattern.bind(this));
 	this.$pause.addEventListener('click', this.pause.bind(this));
+	this.$volume.addEventListener('click',this.setVolume.bind(this));
 	//播放时间改变触发
 	this.audio.addEventListener('timeupdate', this.progress.bind(this));
 	//播放结束之后触发
-	this.audio.addEventListener('ended',this.next.bind(this));
-	this.$proSlider.addEventListener('click', function(e) {
-		_this.setProgress(e);
-	});
+	this.audio.addEventListener('ended',this.playModel.bind(this));
+	this.$progress.addEventListener('click', this.setProgress.bind(this));
 	this.loadPlaylist();
 	this.loadAndPlay(0);
 }
@@ -65,7 +70,6 @@ player.prototype.pause = function() {
 player.prototype.load = function() {
 	this.$title.innerHTML = this.song.title;
 	this.$singer.innerHTML = this.song.artist;
-	// this.$time.innerHTML = $('.time');
 	this.$coverLink.href = 'https://music.douban.com' + this.song.album;
 	this.$cover.src = this.song.picture;
 	this.audio.src = this.song.url;
@@ -91,16 +95,79 @@ player.prototype.prev = function() {
 	this.loadAndPlay(this.playListIndex);
 }
 /**
+ * 默认列表循环，单曲循环
+ */
+player.prototype.oneLoop = function() {
+	this.loadAndPlay(this.playListIndex);
+}
+/**
+ * 随机
+ */
+player.prototype.randLoop = function() {
+	//产生随机数
+	let len = this.playList.length,
+		rand = Math.floor(Math.random() * len);
+	this.playListIndex = rand;
+	this.loadAndPlay(this.playListIndex);
+}
+/**
+ * 产生不同模式,状态机
+ */
+player.prototype.pattern = function(e) {
+	let pattern = e.target.dataset.model || 'order';
+	const arr = ['order','one','random'];
+	if(pattern && (pattern == 'order' || pattern == 'one' || pattern == 'random')) {
+		switch(pattern) {
+			case 'order': 
+				{
+					this.$pattern.dataset.model = 'one'; 
+					this.$patternDesc.innerHTML = '单曲';
+					return 'one'; 
+					break;
+				}
+			case 'one': 
+				{
+					this.$pattern.dataset.model = 'random';
+					this.$patternDesc.innerHTML = '随机'; 
+					return 'random'; 
+					break;
+				}
+			
+			case 'random':
+				{
+					this.$pattern.dataset.model = 'order';
+					this.$patternDesc.innerHTML = '顺序'; 
+					return 'order'; 
+					break;
+				}
+		}
+	}
+	return 'order';
+}
+/**
+ * 播放模式
+ */
+player.prototype.playModel = function() {
+	let pattern = this.$pattern.dataset.model || 'order';
+	if(pattern && (pattern == 'order' || pattern == 'one' || pattern == 'random')) {
+		switch(pattern) {
+			case 'order': this.next(); break;
+			case 'one':   this.oneLoop(); break;
+			case 'random': this.randLoop(); break;
+		}
+	}
+}
+/**
  * 加载播放列表,以及播放列表 Item 位置
  */
 player.prototype.loadPlaylist = function() {
-	var ind;
-	var arr = this.playList.map(function(list,index){
+	var ind,
+		arr = this.playList.map(function(list,index){
 		ind = index + 1;
 		return  '<div class="playlist-item" data-index="' + index + '">' + ind + '.  ' + list.title + ' ' + list.artist +
 		'</div>';
-	})
-	var innerHTML = arr.join('');
+		}),
+		innerHTML = arr.join('');
 	this.$playList.innerHTML = innerHTML;
 	//最外层绑定事件
 	var _this = this;
@@ -128,16 +195,33 @@ player.prototype.progress = function() {
 		this.$proSlider.style.width = (this.audio.currentTime / this.song.length)* 100 + '%';
 }
 /**
- * 点击设置进度条
+ * 点击快进歌曲
  */
 player.prototype.setProgress = function(e) {
-	this.audio.currentTime = e.offsetX / this.$proSlider.clientWidth * this.audio.duration	
+	//当前歌曲时间 = 点击位置所占比例 x 总时间
+	this.audio.currentTime = e.offsetX / this.$progress.clientWidth * this.audio.duration;
+	this.play();	
 }
 /**
  * 声音控制
  */
-player.prototype.setVolume = function() {
-
+player.prototype.setVolume = function(e) {
+	//这里情况比较特殊，不能采用上面的方法，因为这里 hover 上去元素才显示出来，
+	//而且我们把事件绑定在最外层
+	const rect = this.$volume.getBoundingClientRect();
+	//这里需要多减去一个声音 icon 的宽度
+	let volume = (e.x - rect.left - 15) / this.$volumeSlider.clientWidth;
+	//限制范围 [0,1]
+	if(volume < 0) {
+		volume = 0;
+	}
+	if(volume > 1) {
+		volume = 1;
+	}
+	if(volume >= 0 && volume <= 1) {
+		this.$volumeValue.style.width = volume * 100 + '%';
+		this.audio.volume = volume;
+	}
 }
 /**
  * 点击播放列表时候，加载，播放歌曲
