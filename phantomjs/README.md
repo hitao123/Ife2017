@@ -6,8 +6,17 @@
 #### 用法
 
 ```
+    1. 网页抓取分析服务系列之二（设备模拟）
     phantomjs task.js keyword [device]
     device 可选 仅有三种设备可选 iphone5、iphone6、ipad
+
+    2. 网页抓取分析服务系列之三（服务封装）
+    node index
+
+    3. 网页抓取分析服务系列之四（数据交互）
+
+    4. 网页抓取分析服务系列之五（并发控制）
+    
 ```
 
 #### 学习使用jshint

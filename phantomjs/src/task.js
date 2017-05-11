@@ -63,7 +63,7 @@ page.open(url,function(status) {
 					obj.title = ($(this).find('.t a').text()) ? ($(this).find('.t a').text()) : ($(this).find('.c-title').text());
 					obj.info = ($(this).find('.c-abstract').text()) ? ($(this).find('.c-abstract').text()) : ($(this).find('.c-color').text());
 					obj.link = ($(this).find('.t a').attr('href')) ? ($(this).find('.t a').attr('href')) : ($(this).find('.c-container a').attr('href'));
-					obj.pic = ($(this).find('.c-img').attr('src')) ? ($(this).find('.c-img').attr('src')) : '没有图片';
+					obj.pic = ($(this).find('.c-img').attr('src')) ? ($(this).find('.c-img').attr('src')) : '';
 					ret.push(obj);
 				})
 				return ret;

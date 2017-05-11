@@ -27,30 +27,32 @@ http.createServer((req, res) => {
     var keyword = result.word || '哈哈';
     var device = result.device || 'desktop';
     //Promise 回调
-    getResultFromBD(keyword,device)
-		.then(res => {
-			//创建一个实体, 类似mysql insert new line
-			var data = JSON.parse(res).datalist;
-			// console.log(data);
-			var ret = new Result({
-				keyword: keyword,
-				device: device,
-				data: data
+    if(req.url !== '/favicon.ico'){
+	    getResultFromBD(keyword,device)
+			.then(res => {
+				//创建一个实体, 类似mysql insert new line
+				var data = JSON.parse(res).datalist;
+				// console.log(data);
+				var ret = new Result({
+					keyword: keyword,
+					device: device,
+					data: data
+				});
+				//保存到mongodb 数据库, write new line
+				// 这里会写入两次，一个请求执行一次，浏览器
+				// 默认会发送 /favicon 这个请求
+				ret.save(err => {
+				  if (err) {
+				    console.log(err);
+				  } else {
+				  	console.log('写入数据成功');
+				  }
+				});
+			})
+			.catch(e => {
+				console.log(e);
 			});
-			//保存到mongodb 数据库, write new line
-			// 这里会写入两次，一个请求执行一次，浏览器
-			// 默认会发送 /favicon 这个请求
-			ret.save(err => {
-			  if (err) {
-			    console.log(err);
-			  } else {
-			  	console.log('写入数据成功');
-			  }
-			});
-		})
-		.catch(e => {
-			console.log(e);
-		});
+    }
     // 响应
     res.write('hello node!');
     res.end();	
