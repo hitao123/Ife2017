@@ -46,11 +46,6 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
-						<th>加载中...</th>
-						<th>加载中...</th>
-						<th>加载中...</th>
-					</tr>
 				</tbody>
 			</table>
 		</div> 
@@ -64,9 +59,11 @@
 		    //非空校验
 		    var keyword = $('#input').val(),
 		        deviceIndex = $('#section option:selected').val(),
-		    	device = $('#section option:selected').text();
-		    	console.log(deviceIndex,device);
+		    	device = $('#section option:selected').text(),
+		    	tbody = document.querySelector('tbody'),
+		    	innerHTML = `<tr><th>加载中...</th><th>加载中...</th><th>加载中...</th></tr>`;
 		    if(keyword && deviceIndex != 0) {
+		    	tbody.innerHTML = innerHTML;
 		    	$('.input').removeClass('warning');
 		    	var data = JSON.stringify({"keyword": keyword, "device": device});
 		    	

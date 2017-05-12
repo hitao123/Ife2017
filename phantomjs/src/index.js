@@ -22,7 +22,7 @@ var Result = mongoose.model('result', {
 http.createServer((req, res) => {
 	//设置响应头
     res.writeHead(200, {"Content-Type": "text/plain"});
-    //第二个参数为true时，使用querystring模块来解析URL中德查询字符串部分
+    //第二个参数为true时，使用querystring模块来解析URL中的查询字符串部分
     var result = url.parse(req.url,true).query;
     var keyword = result.word || '哈哈';
     var device = result.device || 'desktop';

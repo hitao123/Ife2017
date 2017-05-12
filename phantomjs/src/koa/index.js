@@ -20,34 +20,37 @@ const exec = require('child_process').exec;
 
 
 const app = new koa();
-const staticPath = './image';
 
 //全局变量
 var cmd = '',
 	html = '',
+	isOn = false, // mongodb 开关
 	postData = '',
 	jsonData = {};
 
-// //连接数据库
-// mongoose.connect('mongodb://localhost/hht');
-// //构建数据模型
-// var Result = mongoose.model('results', {
-// 	keyword: String,
-// 	device: String,
-// 	data: Array
-// });
-// var db = mongoose.connection;
+if(isOn) {
+	//连接数据库
+	mongoose.connect('mongodb://localhost/hht');
+	//构建数据模型
+	var Result = mongoose.model('results', {
+		keyword: String,
+		device: String,
+		data: Array
+	});
+	var db = mongoose.connection;
 
-// db.on('error', function(){
-//     console.log("数据库连接错误");
-// });
-// db.once('open', function(){
-//     console.log("数据库已连接");
-// });
+	db.on('error', function(){
+	    console.log("数据库连接错误");
+	});
+	db.once('open', function(){
+	    console.log("数据库已连接");
+	});
+}
 
 
-//静态图片资源
-app.use(static(path.join(__dirname,'/images')));
+//静态资源
+app.use(static(path.join(__dirname,'/static/')));
+
 // 中间件 这里用来处理提交表单
 app.use(bodyParser());
 app.use(async (ctx, next) => {
@@ -61,6 +64,21 @@ app.use(async (ctx, next) => {
 	    device = postData['device'] || 'desktop';
 	    cmd = 'phantomjs  ' + path.join('../','task.js') + ' ' + word + ' ' + device;
 	    jsonData = await handlerTask(cmd);
+	    if(isOn) {
+	    	let ret = new Result({
+	    		keyword: word,
+	    		device: device,
+	    		data: jsonData
+	    	});
+	    	//保存到mongodb 数据库
+	    	ret.save(err => {
+	    	  if (err) {
+	    	    console.log(err);
+	    	  } else {
+	    	  	console.log('写入数据成功');
+	    	  }
+	    	});
+	    }
 		//添加uuid
 	    jsonData.datalist = jsonData.datalist.map((item,index) => {
 	    	if(item.pic) {
@@ -74,9 +92,9 @@ app.use(async (ctx, next) => {
 	    });
 	    // console.log(jsonData,"****");
 	    //目录不存在，新建目录
-	    if(!fsExistsSync(path.join(__dirname,'/images/'))) {
+	    if(!fsExistsSync(path.join(__dirname,'/static/images/'))) {
 	    	//创建目录
-	    	fs.mkdir(__dirname + '/images/', function (err) {
+	    	fs.mkdir(__dirname + '/static/images/', function (err) {
 	    	    if(err) {
 	    	  		throw err;
 	    	    }
@@ -87,7 +105,7 @@ app.use(async (ctx, next) => {
 	    let len = jsonData.datalist.length;
 	    for (let i = 0; i < len; i++) {
 	    	if(jsonData.datalist[i]['pic']) {
-	    		let pa = path.join(__dirname,'/images/') + jsonData.datalist[i]['picId'];
+	    		let pa = path.join(__dirname,'/static/images/') + jsonData.datalist[i]['picId'];
 	    		console.log('正在下载中',pa);
 	    		let msg = await downLoad(jsonData.datalist[i]['pic'], pa);
 	    		console.log(msg);
@@ -100,13 +118,12 @@ app.use(async (ctx, next) => {
 	}
 })
 
-
 //路由控制，首页显示
 router.get('/', async (ctx, next) => {
 	let res = ctx.response;
 	//读取文件,这里为了不重复读，加一个判断
 	if(!html) {
-		html = await readFile(path.resolve(__dirname,'view','index.html'))
+		html = await readFile(path.join(__dirname,'view','index.html'))
 	}
 	res.set({
 	    'Content-Type': 'text/html; charset=utf-8',

@@ -1,3 +1,5 @@
 /phantomjs/screen_shot/**
 /phantomjs/node_modules/**
 /phantomjs/test/**
+/phantomjs/src/screen_shot/**
+/phantomjs/src/koa/static/images/**

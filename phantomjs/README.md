@@ -7,13 +7,21 @@
 
 ```
     1. 网页抓取分析服务系列之二（设备模拟）
-    phantomjs task.js keyword [device]
-    device 可选 仅有三种设备可选 iphone5、iphone6、ipad
+    进入 phantomjs/src 目录 运行命令
+      phantomjs task.js keyword [device]
+      device 可选 仅有三种设备可选 iphone5、iphone6、ipad
 
     2. 网页抓取分析服务系列之三（服务封装）
-    node index
-
+    npm install 安装依赖
+    进入 phantomjs/src 目录 运行命令
+      node index 开启服务
+      打开浏览器 访问 http://localhost:8000/?word=哈哈&device=iphone5
+    
     3. 网页抓取分析服务系列之四（数据交互）
+    我们这里 2,3,4 依赖放在一起，这里不需要 npm install
+    进入 phantomjs/src/koa 目录 运行命令
+      node index
+      打开浏览器输入关键字，选择url ，点击查询
 
     4. 网页抓取分析服务系列之五（并发控制）
     
@@ -55,3 +63,12 @@
     }
 ```
 
+##### 踩坑之路
+1. 在使用`koa-static` 模块的时候，访问静态资源 404 ，后来查到原因
+
+```
+  app.use(static(path.join(__dirname,'/static/')));
+  静态资源需要在static 目录下新建目录，如图片建立images
+  static/images 二级目录，这样才可以访问 http://localhost:port/images/x.png
+  
+```
