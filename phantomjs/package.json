@@ -23,11 +23,15 @@
   },
   "homepage": "https://github.com/hitao123/Ife2017#readme",
   "dependencies": {
+    "async": "^2.4.0",
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2",
     "koa": "^2.2.0",
     "koa-router": "^7.1.1",
     "mocha": "^3.3.0",
     "mongoose": "^4.9.8",
-    "node-uuid": "^1.4.8"
+    "node-uuid": "^1.4.8",
+    "socket.io": "^2.0.1"
   },
   "devDependencies": {
     "koa-bodyparser": "^4.2.0",

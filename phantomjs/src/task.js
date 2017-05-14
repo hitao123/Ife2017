@@ -9,14 +9,15 @@ var config = require('./config.js')();
 phantom.outputEncoding = 'utf-8';
 
 if(system.args.length === 1) {
-	console.log('Usage: phantomjs task.js keyWord [device] like[iphone5 | iphone6| ipad]');
+	console.log('Usage: phantomjs ,task.js ,keyWord, [device] like [iphone5 | iphone6| ipad] ,[page]');
 	phantom.exit();
 }
 
 var key = system.args[1],
 	domin = 'https://www.baidu.com/', //默认
-	param = 's?word=' + encodeURI(key) + '&ie=utf-8';
+	param = 's?word=' + encodeURI(key) + '&ie=utf-8&pn=';
 	time = Date.now(),
+	pn = '0';
 	result = {
 		code: 0,
 		msg: '抓取失败',
@@ -48,7 +49,16 @@ if(system.args[2] && (system.args[2] == 'iphone5' || system.args[2] == 'iphone6'
 	};
 }
 
-var url = domin + param;
+if(system.args[3]) {
+	//百度一页 10个数据
+	pn = parseInt(system.args[3]) - 1;
+	if(pn <= 0) {
+		pn = '0';
+	} else {
+		pn = pn + '0';
+	}
+}
+var url = domin + param + pn;
 page.open(url,function(status) {
 	if(status === 'success') {
 		//用于页面加载外部脚本,加载完成回调

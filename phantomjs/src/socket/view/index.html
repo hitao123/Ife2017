@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title>Search</title>
+	<style type="text/css">
+		* { box-sizing: border-box; padding: 0; margin: 0;}
+		.container { margin: 50px auto; }
+		.form { text-align: center; margin: 20px 0 100px;}
+		.input { width: 200px; height: 24px; border: none; outline: 1px solid #f3f3f3; text-indent: 5px;}
+		.input:focus { outline-color: green; }
+		.warning:focus { outline-color: red; }
+		.page { width: 50px; }
+		.select { width: 120px; height: 120px; border: none; outline: 1px solid #f1f1f1; margin: 0 20px;}
+		.select option { height: 24px; }
+		.btn { width: 120px; height: 24px; border: none; outline: 1px solid #f3f3f3; cursor: pointer;}
+		.table { text-align: center; margin: 0 100px;}
+		.table h4 { margin: 10px 0; }
+		table { border: 2px solid #f5f5f5; margin: 0 auto; border-collapse:collapse;}
+		table th { border: 1px solid #d3d3d3; }
+		thead tr { color: #ff0000; padding: 8px 10px; }
+		tbody tr { padding: 4px 10px; }
+	</style>
+</head>
+<body>
+	<div class="container">
+		<form action="" class="form">
+			<input id="input" type="input" class="input" placeholder="输入关键字，如王宝强">
+			<input id="page" type="number" min="0" class="input page" placeholder="输入页码">
+			<select id="select" class="select" multiple>
+				<option value="">请选择设备</option>
+				<option value="desktop">desktop</option>
+				<option value="iphone5">iphone5</option>
+				<option value="iphone6">iphone6</option>
+				<option value="ipad">ipad</option>
+			</select>
+			<button class="btn">点击查询</button>
+		</form>
+		<div class="table">
+			<h4>查询结果如下</h4>
+			<table>
+				<thead>
+					<tr>
+						<th>标题</th>
+						<th>摘要</th>
+						<th>图片</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</div> 
+	</div>
+	<script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
+	<script type="text/javascript">
+		$(function() {
+			var socket = io();
+			//表单提交
+			$('form').submit(function (e) {
+			    // 阻止表单默认提交
+			    e.preventDefault();
+			    //非空校验
+			    var keyword = $('#input').val(),
+			    	pn = $('#page').val(),
+			        deviceArr = [],
+			        options = document.querySelector('#select'),
+			    	tbody = document.querySelector('tbody'),
+			    	innerHTML = `<tr><th>加载中...</th><th>加载中...</th><th>加载中...</th></tr>`;
+
+                for(let i = 0, len = options.length; i < len; i++){
+                	// 选中
+                	if(options[i].selected) {
+                 		// 值不为空
+                 		if(options[i].value) {
+                     		deviceArr.push(options[i].value);
+                 		}
+                 	}
+                }
+                
+			    if(keyword && pn > 0 && deviceArr.length !== 0) {
+			    	tbody.innerHTML = innerHTML;
+			    	$('.input').removeClass('warning');
+			    	pn = parseInt(pn);
+			    	var data = JSON.stringify(
+			    		{
+			    			"keyword": keyword, 
+			    			"pn": pn,
+			    			"devices": deviceArr
+			    		});
+			    	// 这里改成 socket.io 与后端通信 
+			    	// console.log(data);
+			    	socket.emit('submit', data);
+			    } else {
+			    	$('.input').addClass('warning');
+			    	alert('请输入关键字,并选择相应的设备');
+			    }
+			});
+			//监听，一旦服务器有数据，马上向客户端发送
+			socket.on('crawl', function(data) {
+				console.log(data.datalist);
+				updateTable(data.datalist);
+			});
+	});
+	//更新表格
+	function updateTable(data) {
+		// console.log(data);
+		var len = data.length,
+			innerHTML = '';
+		for(let i = 0; i < len ; i++) {
+			let item = data[i],
+			tr = `<tr><td><a href="${item.link}">${item.title}</a></td><td>${item.info}</td>`;
+			let pic = item.pic ? `<td><img src="/images/${item.picId}"></td></tr>` : `<td></td><tr/>`;
+			innerHTML += (tr + pic);
+		}
+		//tbody.innerHTML = innerHTML;
+		//这里采用追加的方式
+		$('tbody').append(innerHTML);
+	}
+	</script>
+</body>
+</html>
